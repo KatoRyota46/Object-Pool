@@ -5,8 +5,10 @@ using UnityEngine;
 public class ObjectPoolCtrl : MonoBehaviour
 {
     //弾のプレファブ
-    public GameObject _bulletObj;
+    public GameObject _poolObj;
+    //弾の配列
     public List<GameObject> _listOfPooledObjects = new List<GameObject>();
+    //生成する球の数
     public int _instantiateCount;
 
     private void Awake()
@@ -16,15 +18,10 @@ public class ObjectPoolCtrl : MonoBehaviour
          */
         for (int i = 0; i < _instantiateCount; i++)
         {
-            GameObject obj = Instantiate(_bulletObj,this.transform);
+            GameObject obj = Instantiate(_poolObj,this.transform);
             obj.SetActive(false);
             _listOfPooledObjects.Add(obj);
         }
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     //GameObject型のデータを返す

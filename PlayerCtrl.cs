@@ -5,27 +5,30 @@ using UnityEngine;
 public class PlayerCtrl : MonoBehaviour
 {
     [SerializeField]
-    ObjectPoolCtrl _objectPool = default;
+    private ObjectPoolCtrl _objectPool = default;
     public GameObject _bullet = default;
     public GameObject _bulletFirePosition = default;
     private float _cooldownTimer = 0;
-    private float _timeInterval = 0.2f;
+    private float _timeInterval = 0.05f;//弾発射ディレイ
 
     private void Update()
     {
         Fire();
         _cooldownTimer -= Time.deltaTime;
     }
-
+    //発射間隔
     private void Fire()
     {
+        //クールダウン以上ならば発射する
         if (_cooldownTimer <= 0)
         {
+            //オブジェクトプール取得
             GameObject obj = _objectPool.GetPooledObject();
             if(obj == null)
             {
                 return;
             }
+            //球の発射位置と角度を格納し表示する
             obj.transform.position = _bulletFirePosition.transform.position;
             obj.transform.rotation = _bulletFirePosition.transform.rotation;
             obj.SetActive(true);
