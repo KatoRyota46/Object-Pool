@@ -5,10 +5,13 @@ using UnityEngine;
 public class ObjectPoolCtrl : MonoBehaviour
 {
     //弾のプレファブ
+    [Header("生成するオブジェクト")]
     public GameObject _poolObj;
     //弾の配列
+    [Header("生成しているオブジェクト")]
     public List<GameObject> _listOfPooledObjects = new List<GameObject>();
     //生成する球の数
+    [Header("生成する個数")]
     public int _instantiateCount;
 
     private void Awake()

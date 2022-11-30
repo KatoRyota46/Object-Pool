@@ -9,7 +9,7 @@ public class InputSystem : MonoBehaviour {
     private GameObject _playerObject;
     [Header("プレイヤー移動速度")]
     [SerializeField]
-    private float _playerMoveSpeed = 0.05f;
+    private float _playerMoveSpeed = 0.105f;
 
     //移動制限処理用変数
     private Vector2 _playerPos;
@@ -46,6 +46,13 @@ public class InputSystem : MonoBehaviour {
         //下移動
         else if (vertical < 0) {
             playerPosition.y -= _playerMoveSpeed;
+        }
+        //低速移動
+        if (Input.GetKeyDown(KeyCode.LeftShift)) {
+            _playerMoveSpeed = _playerMoveSpeed / 2;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift)) {
+            _playerMoveSpeed = 0.105f;
         }
         transform.position = playerPosition;
         #endregion

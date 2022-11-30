@@ -4,20 +4,37 @@ using UnityEngine;
 
 public class EnemyCtrl : MonoBehaviour
 {
-    public int _enemyMaxHp = 10;
-    public int _enemyHp = default;
-    public BulletCtrl _bulletCtrl = default;
-    public ObjectPoolCtrl _objectPool;
-    public float _enemyInstantDelay = 0.1f;
-    private Rigidbody2D _rd;
+    private int _enemyMaxHp = 10;
+    private int _enemyHp = default;
+    [SerializeField]
+    private BulletCtrl _bulletCtrl = default;
+    [SerializeField]
+    private ObjectPoolCtrl _objectPool;
+    [SerializeField]
+    private GameObject _enemyInstante = default;
+    private float _enemyInstantDelay = 1.5f;
+    [SerializeField]
+    private Vector3 _enemyMoveSpeed = default;
+    public float _enemyHitDamage = default;
+    private float _activeTime = 0f;
+    private Rigidbody2D _rigidBody;
+    [Header("åoå±íl")]
+    [SerializeField]
+    public float _exp = default;
+    public ExplosionSystem _explosion;
 
     private void Awake() {
         _enemyHp = _enemyMaxHp;
-        _rd = GetComponent<Rigidbody2D>();
+        _rigidBody = GetComponent<Rigidbody2D>();
     }
 
     private void Update() {
+        //_activeTime += Time.deltaTime;
+        //if (_activeTime >= 1.5f) {
+        //    return;
+        //}
         EnemyInstantiate();
+        transform.position -= _enemyMoveSpeed;
         _enemyInstantDelay -= Time.deltaTime;
     }
 
@@ -26,6 +43,7 @@ public class EnemyCtrl : MonoBehaviour
             _enemyHp -= _bulletCtrl._bulletDamage;
             if (_enemyHp <= 0) {
                 this.gameObject.SetActive(false);
+                Instantiate(_explosion, collision.transform.position, Quaternion.identity);
             }
         }
     }
@@ -36,9 +54,8 @@ public class EnemyCtrl : MonoBehaviour
             if (obj == null) {
                 return;
             }
-            _rd.AddForce(0, -1, 0);
-            obj.transform.position = transform.position;
-            obj.transform.rotation = transform.rotation;
+            obj.transform.position = _enemyInstante.transform.position;
+            obj.transform.rotation = _enemyInstante.transform.rotation;
             obj.SetActive(true);
             _enemyInstantDelay = 0;
         }
