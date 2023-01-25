@@ -8,6 +8,6 @@ public class ExplosionSystem : MonoBehaviour
     private void Start() {
         // ‰‰o‚ªŠ®—¹‚µ‚½‚çíœ‚·‚é
         ParticleSystem particleSystem = GetComponent<ParticleSystem>();
-        particleSystem.gameObject.SetActive(false);
+        Destroy(gameObject, particleSystem.main.duration);
     }
 }

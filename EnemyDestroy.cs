@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class EnemyDestroy : MonoBehaviour
 {
+    public GameObject _enemyObj = default;
+
     private void OnBecameInvisible() {
-        this.gameObject.SetActive(false);
+        _enemyObj.SetActive(false);
     }
 }
