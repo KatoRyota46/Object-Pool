@@ -16,6 +16,13 @@ public static class Utils{
         );
     }
 
+    public static float GetAngle(Vector2 from, Vector2 to) {
+        float dx = to.x - from.x;
+        float dy = to.y - from.y;
+        float rad = Mathf.Atan2(dy, dx);
+        return rad * Mathf.Rad2Deg;
+    }
+
     //指定された角度(0～360)をベクトルに変換して返す
     public static Vector3 GetDirection(float angle)
     {
