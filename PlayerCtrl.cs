@@ -48,7 +48,7 @@ public class PlayerCtrl : MonoBehaviour
     private int _flashCount = default;//フラッシュ回数
     private CircleCollider2D _circleCollider;
     private static PlayerCtrl _playerInstance;
-    private int _residue = 0;//プレイヤー残基
+    private int _residue = 3;//プレイヤー残基
     private int _residueCount = 0;//撃破回数
     [SerializeField]
     private GameObject[] _residueIcons;
@@ -197,12 +197,14 @@ public class PlayerCtrl : MonoBehaviour
     /// </summary>
     /// <param name="exp">現在のEXP</param>
     public void AddExp(int exp) {
-        if (Level == _levelMax) {//現在レベルと最大レベルが同じであればレベルアップの処理をしない
+        //現在レベルと最大レベルが同じであればレベルアップの処理をしない
+        if (Level == _levelMax) {
             return;
         }        
         PlayerExp += exp;//プレイヤーの経験値を増やす
-        
-        if (PlayerExp < NeedExp) {//まだレベルアップに必要な経験値に足りていない場合、処理を中断する
+
+        //まだレベルアップに必要な経験値に足りていない場合、処理を中断する
+        if (PlayerExp < NeedExp) {
             return;
         }        
         Level++;//レベルアップ        
@@ -255,8 +257,9 @@ public class PlayerCtrl : MonoBehaviour
                 }
                 Debug.Log("弾発射の間隔は" + _shotDelay);
                 break;
-            case 4:                
-                if (_playerDefence >= PLAYER_MAX_DEFENCE) {//プレイヤーの防御力が定数よりも超えれば処理をしない
+            case 4:
+                //プレイヤーの防御力が定数よりも超えれば処理をしない
+                if (_playerDefence >= PLAYER_MAX_DEFENCE) {
                     return;
                 }
                 _playerDefence++;//防御力上昇
