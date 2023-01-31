@@ -7,7 +7,7 @@ public class HeelPoint : MonoBehaviour
     private int _heelPoint = default;//‰ñ•œ—Ê;
     [SerializeField]
     private float _instantTime = default;//‚Æ‚Ç‚Ü‚ê‚éŠÔ
-    private float _deleteTime = 4f;//íœŠÔ
+    private float _deleteTime = 5.5f;//íœŠÔ
     private bool _isEnable = false;
 
     /// <summary>

@@ -46,10 +46,10 @@ public class PlayerCtrl : MonoBehaviour
     private float _flashInterval = default;//フラッシュ間隔
     [SerializeField]
     private int _flashCount = default;//フラッシュ回数
-    private BoxCollider2D _boxCollider;
+    private CircleCollider2D _circleCollider;
     private static PlayerCtrl _playerInstance;
-    private int _residue = 1;//プレイヤー残基
-    private int _residueCount = 0;
+    private int _residue = 0;//プレイヤー残基
+    private int _residueCount = 0;//撃破回数
     [SerializeField]
     private GameObject[] _residueIcons;
     #endregion
@@ -100,34 +100,23 @@ public class PlayerCtrl : MonoBehaviour
 
     private void Awake() {
         PlayerInstance = this;
-        //初期レベル
-        Level = 1;
-        //次のレベルに必要な経験値
-        NeedExp = GetNeedExp(1);
-        //現在HPを最大HPに初期化する
-        PlayerHp = PlayerMaxHp;
-        //スポーンタイマーをインターバルに初期化する
-        _playerSpawnTimer = _playerSpawnInterval;
-        //ボックスコライダー取得
-        _boxCollider = GetComponent<BoxCollider2D>();
-        //スプライトレンダラー取得
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        //子機を非表示
-        _cordlessHandset.SetActive(false);
+        Level = 1;//初期レベル        
+        NeedExp = GetNeedExp(1);//次のレベルに必要な経験値
+        PlayerHp = PlayerMaxHp;//現在HPを最大HPに初期化する        
+        _playerSpawnTimer = _playerSpawnInterval;//スポーンタイマーをインターバルに初期化する        
+        _circleCollider = GetComponent<CircleCollider2D>();//サークルコライダー取得        
+        _spriteRenderer = GetComponent<SpriteRenderer>();//スプライトレンダラー取得        
+        _cordlessHandset.SetActive(false);//子機を非表示
     }
 
     private void Update()
     {
         transform.localPosition = Utils.ClampPosition(transform.localPosition);
-        Vector3 cameraPos = Camera.main.WorldToScreenPoint(transform.position);
-        //発射に移動
-        Fire();
-        //毎フレームごとにクールダウンを減らす
-        _cooldownTimer = _cooldownTimer + 0.01f;
-        //毎フレームごとにスポーンタイマーを減らす
-        _playerSpawnTimer -= Time.deltaTime;
-        //スタータスがダメージであるなら下の処理を中断する
-        if (_state == STATE.DAMAGE) {
+        Vector3 cameraPos = Camera.main.WorldToScreenPoint(transform.position);        
+        Fire();//発射に移動        
+        _cooldownTimer = _cooldownTimer + 0.01f;//毎フレームごとにクールダウンを増やす        
+        _playerSpawnTimer -= Time.deltaTime;//毎フレームごとにスポーンタイマーを減らす        
+        if (_state == STATE.DAMAGE) {//スタータスがダメージであるなら下の処理を中断する
             return;
         }
         /*
@@ -143,8 +132,8 @@ public class PlayerCtrl : MonoBehaviour
                 this.gameObject.SetActive(true);
                 _state = STATE.NOMAL;
                 PlayerHp = PlayerMaxHp;
-                _residue--;
-                _residueCount++;
+                _residue--;//残基を減らす
+                _residueCount++;//プレイヤーが撃破された回数を増やす
                 UpdateResidueIcon();
             }
         }
@@ -153,13 +142,11 @@ public class PlayerCtrl : MonoBehaviour
     /// 発射間隔
     /// </summary>
     private void Fire()
-    {
-        //クールダウン以上ならば発射する
-        if (_cooldownTimer >= _shotDelay)
-        {
-            //オブジェクトプール取得
-            GameObject obj = _objectPool.GetPooledObject();
-            if(obj == null)
+    {       
+        if (_cooldownTimer >= _shotDelay)//クールダウン以上ならば発射する
+        {            
+            GameObject obj = _objectPool.GetPooledObject();//オブジェクトプール取得
+            if (obj == null)
             {
                 return;
             }
@@ -167,10 +154,10 @@ public class PlayerCtrl : MonoBehaviour
             obj.transform.position = _bulletFirePosition.transform.position;
             obj.transform.rotation = _bulletFirePosition.transform.rotation;
             obj.SetActive(true);
-            _cooldownTimer = _timeInterval;
-            if (_isCordlessHandset) {
-                _cordlessHandset.SetActive(true);
-                obj = _objectPool.GetPooledObject();
+            _cooldownTimer = _timeInterval;//クールダウンのリセット
+            if (_isCordlessHandset) {//レベルアップ時に子機の追加が選択されたら
+                _cordlessHandset.SetActive(true);//子機の表示
+                obj = _objectPool.GetPooledObject();//オブジェクトプール取得
                 if (obj == null) {
                     return;
                 }
@@ -183,40 +170,25 @@ public class PlayerCtrl : MonoBehaviour
     /// ダメージ処理
     /// </summary>
     /// <returns></returns>
-    private IEnumerator Hit() {
-        //無敵回数
-        int invincibleCount = 20;
-        //ボックスコライダー非有効化
-        _boxCollider.enabled = false;
-        //レンダラーの色を黒にする
-        _spriteRenderer.color = Color.black;
+    private IEnumerator Hit() {      
+        int invincibleCount = 20;//無敵回数を設定       
+        _circleCollider.enabled = false;//ボックスコライダー非有効化        
+        _spriteRenderer.color = Color.black;//レンダラーの色を黒にする
+        
+        for (int i = 0; i < _flashCount; i++) {//フラッシュカウントの数値分だけ回す            
+            yield return new WaitForSeconds(_flashInterval);//フラッシュインターバルの数値分だけ止める            
+            _spriteRenderer.enabled = false;//ボックスコライダーの非有効化            
+            yield return new WaitForSeconds(_flashInterval);//フラッシュインターバルの数値分だけ止める            
+            _spriteRenderer.enabled = true;//ボックスコライダー有効化
 
-        //フラッシュカウントの数値分だけ回す
-        for (int i = 0; i < _flashCount; i++) {
-            //フラッシュインターバルの数値分だけ止める
-            yield return new WaitForSeconds(_flashInterval);
-            //ボックスコライダーの非有効化
-            _spriteRenderer.enabled = false;
-            //フラッシュインターバルの数値分だけ止める
-            yield return new WaitForSeconds(_flashInterval);
-            //ボックスコライダー有効化
-            _spriteRenderer.enabled = true;
-
-            //iの値が無敵カウントを超えたら
-            if (i > invincibleCount) {
-                //ステータスを無敵に変更する
-                _state = STATE.INVINCIBLE;
-                //レンダラーの色を緑にする
-                _spriteRenderer.color = Color.green;
+            if (i > invincibleCount) {//iの値が無敵カウントを超えたら                
+                _state = STATE.INVINCIBLE;//ステータスを無敵に変更する                
+                _spriteRenderer.color = Color.green;//レンダラーの色を緑にする
             }
-        }
-
-        //ステータスを通常に変更する
-        _state = STATE.NOMAL;
-        //ボックスコライダー有効化
-        _boxCollider.enabled = true;
-        //レンダラーの色を赤にする
-        _spriteRenderer.color = Color.red;
+        }        
+        _state = STATE.NOMAL;//ステータスを通常に変更する        
+        _circleCollider.enabled = true;//ボックスコライダー有効化        
+        _spriteRenderer.color = Color.white;//レンダラーの色を赤にする
     }
 
     /// <summary>
@@ -225,22 +197,18 @@ public class PlayerCtrl : MonoBehaviour
     /// </summary>
     /// <param name="exp">現在のEXP</param>
     public void AddExp(int exp) {
-        if (Level == _levelMax) {
+        if (Level == _levelMax) {//現在レベルと最大レベルが同じであればレベルアップの処理をしない
             return;
-        }
-        //プレイヤーの経験値を増やす
-        PlayerExp += exp;
-        //まだレベルアップに必要な経験値に足りていない場合、処理を中断する
-        if (PlayerExp < NeedExp) {
+        }        
+        PlayerExp += exp;//プレイヤーの経験値を増やす
+        
+        if (PlayerExp < NeedExp) {//まだレベルアップに必要な経験値に足りていない場合、処理を中断する
             return;
-        }
-        //レベルアップ
-        Level++;
-        //レベルアップに必要だった経験値を記憶
-        PreviewNeedExp = NeedExp;
-        //次のレベルアップに必要な経験値を計算する
-        NeedExp = GetNeedExp(Level);
-        LevelUpStatus(Random.Range(1,6));
+        }        
+        Level++;//レベルアップ        
+        PreviewNeedExp = NeedExp;//レベルアップに必要だった経験値を記憶        
+        NeedExp = GetNeedExp(Level);//次のレベルアップに必要な経験値を計算する
+        LevelUpStatus(Random.Range(1,7));//上昇させるステータスを決める
     }
 
     /// <summary>
@@ -266,7 +234,7 @@ public class PlayerCtrl : MonoBehaviour
     /// レベルアップ時のステータス上昇
     /// 値によって上昇するステータスが決まる
     /// </summary>
-    /// <param name="randomUp">1～5の間で値が決まる</param>
+    /// <param name="randomUp">1～6の間で値が決まる</param>
     private void LevelUpStatus(int randomUp) {
         switch (randomUp) {
             case 1:
@@ -275,33 +243,41 @@ public class PlayerCtrl : MonoBehaviour
                  */
                 _bulletCtrl.BulletDamage = Mathf.FloorToInt(_bulletCtrl.BulletDamage * ATTACK_BASE_VALUE) + _attackInterval;
                 _attackInterval++;
+                Debug.Log("弾のダメージは" + _bulletCtrl.BulletDamage);
                 break;
-            case 2:
-                //最大HP増加
-                PlayerMaxHp = PlayerMaxHp + 10;
+            case 2:                
+                PlayerMaxHp = PlayerMaxHp + 10;//最大HP増加
+                Debug.Log("プレイヤーの最大HPは" + PlayerMaxHp);
                 break;
-            case 3:
-                //弾発射の間隔強化
-                if (_shotDelay <= 0.2f) {
-                    _shotDelay = _shotDelay - 0.01f;
+            case 3:                
+                if (_shotDelay >= 0.05f) {//弾発射の間隔強化
+                    _shotDelay = _shotDelay - 0.02f;
                 }
+                Debug.Log("弾発射の間隔は" + _shotDelay);
                 break;
-            case 4:
-                //プレイヤーの防御力が定数よりも超えれば処理をしない
-                if (_playerDefence >= PLAYER_MAX_DEFENCE) {
+            case 4:                
+                if (_playerDefence >= PLAYER_MAX_DEFENCE) {//プレイヤーの防御力が定数よりも超えれば処理をしない
                     return;
                 }
                 _playerDefence++;//防御力上昇
+                Debug.Log("プレイヤーの防御力は" + _playerDefence);
                 break;
             case 5:
-                _isCordlessHandset = true;
-                randomUp = Random.Range(1, 5);
+                _playerHp += _playerMaxHp / 2;//HPの最大値の半分回復
+                if (_playerHp >= _playerMaxHp) {//回復した結果現在HPが最大HP以上になれば
+                    _playerHp = _playerMaxHp;//現在HPを最大HPにする
+                }
+                Debug.Log("プレイヤーのHP" + _playerHp);
+                break;
+            case 6:
+                _isCordlessHandset = true;//子機追加用のフラグをオンにする
+                randomUp = Random.Range(1, 6);//ランダムのレンジを1～5に減少させる
                 break;
         }
     }
 
     private void UpdateResidueIcon() {
-        for (int i = 0; i < _residueIcons.Length; i++) {
+        for (int i = 0; i < _residueIcons.Length; i++) {//iの値を残基を表示しているアイコンの分だけ回す
             if (_residueCount <= i) {
                 _residueIcons[i].gameObject.SetActive(true);
             } else {

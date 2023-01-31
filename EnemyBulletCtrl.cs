@@ -7,8 +7,6 @@ public class EnemyBulletCtrl : MonoBehaviour
     [Header("’e‚ÌˆÚ“®•ûŒü")]
     [SerializeField]
     private Vector3 _enemyBulletMove = default;
-    private float _enemyBulletDeleteTime = 1.5f;
-    private float _enemyBulletDeleteIntarval = 0f;
     public int _bulletHitDamage = 5;
 
     public Vector3 EnemyBulletMove {
@@ -24,9 +22,7 @@ public class EnemyBulletCtrl : MonoBehaviour
             }
         }
         transform.position -= EnemyBulletMove;
-        _enemyBulletDeleteIntarval += _enemyBulletDeleteIntarval + 0.3f;
-        if (_enemyBulletDeleteIntarval == _enemyBulletDeleteTime) {
-            _enemyBulletDeleteIntarval = 0;
+        if (this.gameObject.transform.position.y <= -30) {
             this.gameObject.SetActive(false);
         }
     }

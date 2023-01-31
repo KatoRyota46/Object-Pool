@@ -24,8 +24,9 @@ public class EnemyCtrl : MonoBehaviour
     private Rigidbody2D _rigidBody;
     private bool _isExpInstantiate = false;
     private bool _isExplosionInstantiate = false;
+    private EnemyBulletBase _enemyBulletBase;
     public int _enemyInstanceCount = 0;
-    public bool _isGameClear = false;
+    private bool _isGameClear = false;
     private static EnemyCtrl _enemyInstance;
 
     [SerializeField]
@@ -39,9 +40,14 @@ public class EnemyCtrl : MonoBehaviour
         get => _enemyInstance;
         set => _enemyInstance = value;
     }
+    public bool IsGameClear {
+        get => _isGameClear;
+        set => _isGameClear = value;
+    }
 
     private void Awake() {
         _enemyInstance = this;
+        _enemyBulletBase = this.gameObject.GetComponent<EnemyBulletBase>();
         _objectPoolExp = GameObject.FindGameObjectWithTag("O_Exp").GetComponent<ObjectPoolCtrl>();
         _objectPoolExplosion = GameObject.FindGameObjectWithTag("O_Explosion").GetComponent<ObjectPoolCtrl>();
         _objectPoolHeel = GameObject.FindGameObjectWithTag("O_Heel").GetComponent<ObjectPoolCtrl>();
@@ -83,18 +89,16 @@ public class EnemyCtrl : MonoBehaviour
     /// オブジェクトプール
     /// Wave形式
     /// 100ごとに変化
+    /// 敵の撃破350でクリア判定
     /// 敵の生成
     /// </summary>
     private void EnemyInstantiate() {
         GameObject obj = _objectPool.GetPooledObject();
         switch (_enemyDeleteCount) {
-            case 1:
-                _isGameClear = true;
-                break;
             case 100:
                 bool isWaveTrigger = false;
                 if (!isWaveTrigger) {
-                    _enemyMoveSpeed = _enemyMoveSpeed * 1.000001f;
+                    _enemyMoveSpeed = _enemyMoveSpeed * 1.0001f;
                     isWaveTrigger = true;
                 }
                 break;
@@ -102,13 +106,12 @@ public class EnemyCtrl : MonoBehaviour
                 EnemyHitDamage = EnemyHitDamage + 5;
                 break;
             case 300:
-                _enemyMaxHp = 50;
-                break;
-            case 400:
+                _enemyMaxHp = 45;
                 EnemyHitDamage = EnemyHitDamage * 4;
+                _enemyBulletBase._enemyBulletType = EnemyBulletBase.ENEMYBULLETTYPE.BEAM;
                 break;
-            case 500:
-                _isGameClear = true;
+            case 350:
+                IsGameClear = true;
                 break;
         }
         if (obj == null) {
